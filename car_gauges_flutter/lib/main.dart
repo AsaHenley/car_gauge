@@ -3,6 +3,9 @@ import 'package:car_gauges_flutter/obd_gauges.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+bool hasData = false;
+Color mainColor = const Color.fromARGB(255, 213, 236, 4);
+Color secondaryColor = const Color.fromARGB(255, 161, 110, 0); //const Color.fromARGB(255, 2, 60, 75);
 void main() {
   runApp(const MainApp());
 }
@@ -31,35 +34,68 @@ class Display extends StatefulWidget{
 class DisplayState extends State<Display>{
 
   double speed = 0;
-  double level = 0;
+  double fuelLevel = 0;
+  double throttle = 0;
+  Duration tripTime = Duration(seconds: 0);
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
     return Container(
-      color: const Color.fromARGB(255, 85, 85, 85),
-      child: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              getObdData().then((data){
-                setState(() {
-                  speed = data['speed'].toDouble();
-                  level = data['fuel'].toDouble();
-                });
-              });
-            },
-            child: Text('Pull New')
-          ),
-          Spacer(),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      color: const Color.fromARGB(255, 0, 0, 0),
+      child: 
+          Stack(
             children: [
-              Speedometer(speed: speed),
-              FuelLevel(level: level)
+              Positioned(
+                left: screenSize.width/2,
+                child: ElevatedButton(
+                  onPressed: () {
+                    getObdData().then((data){
+                      setState(() {
+                        if(!hasData){return;}
+                        speed = data['speed'].toDouble();
+                        fuelLevel = data['fuel'].toDouble();
+                        throttle = data['throttle'].toDouble();
+                        tripTime = Duration(seconds: data['run_time']);
+                      });
+                    });
+                  },
+                  child: Text('Pull New')
+                )
+              ),
+              Positioned(
+                top: screenSize.height * 0.2,
+                left: screenSize.width * 0.2,
+                child: Container(
+                  width: screenSize.width * 0.3,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: secondaryColor),
+                  child: FittedBox(fit: BoxFit.contain, child: Speedometer(speed: speed, title: 'MPH'))
+                )
+              ),
+              Positioned(
+                top: screenSize.height * 0.2,
+                left: screenSize.width * 0.2,
+                child: SizedBox(
+                  width: screenSize.width * 0.3,
+                  child: FittedBox(fit: BoxFit.contain, child: RadialLevel(level: throttle))
+                )
+              ),
+              Positioned(
+                left: screenSize.width*0.6,
+                top: screenSize.height*0.15,
+                child: SizedBox(
+                  width: screenSize.width * 0.25,
+                  height: screenSize.height * .5,
+                  child: FittedBox(fit: BoxFit.contain, child: LevelGauge(level: fuelLevel)),
+                )             
+              ),
+              Positioned(
+                left: 20,
+                top: 20,
+                child: Text(tripTime.toString().substring(0, tripTime.toString().indexOf('.')), style: TextStyle(color: mainColor, fontSize: 32))
+              )
             ],
           ),
-          Spacer()
-        ],
-      )
     );
   }
   
@@ -67,12 +103,14 @@ class DisplayState extends State<Display>{
 
 
 Future<dynamic> getObdData() async{
-  final response = await http.get(Uri.parse('http://127.0.0.1:8000/'));
-
-  if(response.statusCode == 200){
+  try{
+    final response = await http.get(Uri.parse('http://127.0.0.1:8000/'));
+    hasData = true;
     return json.decode(response.body);
-  }
-  else{
+  }catch(_){
+    print('Unable to Fetch Data');
+    hasData = false;
     return [];
   }
+
 }

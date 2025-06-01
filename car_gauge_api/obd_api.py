@@ -1,9 +1,11 @@
 from fastapi import FastAPI
+import time
 import obd
 import random
 
 app = FastAPI()
 connection = obd.OBD()
+start_time = time.time()
 
 @app.get("/")
 def read_root():
@@ -12,13 +14,13 @@ def read_root():
 
 def getObdData():
     # Read obd data here, parse it and return it
-    if(connection.status == obd.OBDStatus.NOT_CONNECTED):
+    if(connection.status() == obd.OBDStatus.NOT_CONNECTED):
         print('No Obd Connection')
         speed = random.randint(10, 140)
         rpm = random.randint(1000, 3500)
         coolant_temp = random.randint(80, 110) # C
         throttle = random.randint(0, 100) # %
-        run_time = obd.commands.RUN_TIME # Sec
+        run_time = int(time.time() - start_time) # time since program start
         fuel = random.randint(0, 100)# %
         oil_temp = random.randint(80, 110) # C
         
