@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:car_gauges_flutter/main.dart';
@@ -7,10 +9,10 @@ import 'package:car_gauges_flutter/main.dart';
 class Speedometer extends StatelessWidget{
   const Speedometer(
     {super.key, 
-    required this.speed,
+    required this.speedKph,
     this.title = ''});
 
-  final double speed;
+  final double speedKph;
   final String title;
 
   @override
@@ -37,7 +39,7 @@ class Speedometer extends StatelessWidget{
           majorTickStyle: MajorTickStyle(length: 10, thickness: 3, color: mainColor),
           minorTickStyle: MinorTickStyle(length: 5, thickness: 2, color: mainColor),
           pointers: [
-            NeedlePointer(value: speed, knobStyle: KnobStyle(color: Colors.black, knobRadius: 0.06), needleEndWidth: 7, needleStartWidth: 0.1, needleColor: const Color.fromARGB(255, 255, 17, 0), enableAnimation: true)
+            NeedlePointer(value: speedKph/1.60934, knobStyle: KnobStyle(color: Colors.black, knobRadius: 0.06), needleEndWidth: 7, needleStartWidth: 0.1, needleColor: const Color.fromARGB(255, 255, 17, 0), enableAnimation: true)
             ],
           annotations: [
             GaugeAnnotation(
@@ -46,7 +48,17 @@ class Speedometer extends StatelessWidget{
               positionFactor: 0.5,
             ),
             GaugeAnnotation(
-              widget: Text('$speed', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: mainColor),),
+              widget: Text('KPH', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: mainColor),),
+              angle: 270,
+              positionFactor: 0.4,
+            ),
+            GaugeAnnotation(
+              widget: Text('${(speedKph).round()}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: mainColor),),
+              angle: 270,
+              positionFactor: 0.3,
+            ),
+            GaugeAnnotation(
+              widget: Text('${(speedKph/1.60934).round()}', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: mainColor),),
               angle: 90,
               positionFactor: 0.7,
             ),
@@ -61,10 +73,14 @@ class RadialLevel extends StatelessWidget{
   const RadialLevel(
     {super.key, 
     required this.level,
-    this.title = ''});
+    this.title = '',
+    this.startAng = 130,
+    this.endAng = 50});
 
   final double level;
   final String title;
+  final double startAng;
+  final double endAng;
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +93,8 @@ class RadialLevel extends StatelessWidget{
           minorTicksPerInterval: 5,
           majorTickStyle: MajorTickStyle(length: 10, thickness: 3, color: mainColor),
           minorTickStyle: MinorTickStyle(length: 5, thickness: 2, color: mainColor),
-          startAngle: 300,
-          endAngle: 60,
+          startAngle: startAng,
+          endAngle: endAng,
           radiusFactor: 1.5,
           ticksPosition: ElementsPosition.outside,
           labelsPosition: ElementsPosition.outside,
@@ -92,6 +108,51 @@ class RadialLevel extends StatelessWidget{
               widget: Text(title, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: mainColor),),
               angle: 90,
               positionFactor: 0.5,
+            ),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+class RmpGauge extends StatelessWidget{
+  const RmpGauge(
+    {super.key, 
+    required this.rmp,
+    this.title = ''});
+
+  final double rmp;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return SfRadialGauge(
+      axes: [
+        RadialAxis(
+          minimum: 0,
+          maximum: 6.1,
+          labelOffset: 10,
+          tickOffset: -5,
+          axisLabelStyle: GaugeTextStyle(color: mainColor, fontSize: 18, fontWeight: FontWeight.bold),
+          showAxisLine: false,
+          interval: 1,
+          minorTicksPerInterval: 5,
+          majorTickStyle: MajorTickStyle(length: 10, thickness: 3, color: mainColor),
+          minorTickStyle: MinorTickStyle(length: 5, thickness: 2, color: mainColor),
+          pointers: [
+            NeedlePointer(value: rmp/1000, knobStyle: KnobStyle(color: Colors.black, knobRadius: 0.06), needleEndWidth: 7, needleStartWidth: 0.1, needleColor: const Color.fromARGB(255, 255, 17, 0), enableAnimation: true)
+            ],
+          annotations: [
+            GaugeAnnotation(
+              widget: Text(title, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: mainColor),),
+              angle: 90,
+              positionFactor: 0.5,
+            ),
+            GaugeAnnotation(
+              widget: Text('$rmp', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: mainColor),),
+              angle: 90,
+              positionFactor: 0.7,
             ),
           ],
         )
