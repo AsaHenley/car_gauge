@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 bool hasData = false;
-Color mainColor = const Color.fromARGB(255, 213, 236, 4);
-Color secondaryColor = const Color.fromARGB(255, 161, 110, 0); //const Color.fromARGB(255, 2, 60, 75);
+Color mainColor = const Color.fromARGB(255, 128, 219, 9);
+Color secondaryColor = const Color.fromARGB(255, 4, 75, 116); //const Color.fromARGB(255, 2, 60, 75);
 void main() {
   runApp(const MainApp());
 }

@@ -37,7 +37,7 @@ class Speedometer extends StatelessWidget{
           majorTickStyle: MajorTickStyle(length: 10, thickness: 3, color: mainColor),
           minorTickStyle: MinorTickStyle(length: 5, thickness: 2, color: mainColor),
           pointers: [
-            NeedlePointer(value: speed, knobStyle: KnobStyle(color: Colors.black, knobRadius: 0.06), needleEndWidth: 7, needleStartWidth: 0.1, needleColor: Colors.red, enableAnimation: true)
+            NeedlePointer(value: speed, knobStyle: KnobStyle(color: Colors.black, knobRadius: 0.06), needleEndWidth: 7, needleStartWidth: 0.1, needleColor: const Color.fromARGB(255, 255, 17, 0), enableAnimation: true)
             ],
           annotations: [
             GaugeAnnotation(
@@ -85,7 +85,7 @@ class RadialLevel extends StatelessWidget{
           axisLineStyle: AxisLineStyle(thickness: 30, color: secondaryColor),
           tickOffset: 2,
           pointers: [
-           RangePointer(value: level, width: 30, dashArray: [8,4], color: mainColor, enableAnimation: true)
+           RangePointer(value: level, width: 30, dashArray: [6,2], color: mainColor, enableAnimation: true)
             ],
           annotations: [
             GaugeAnnotation(
@@ -118,7 +118,7 @@ class LevelGauge extends StatelessWidget{
         markerPointers: [
           LinearWidgetPointer(value: 3, offset: 10, position: LinearElementPosition.outside, enableAnimation: false, child: Text('E', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: mainColor))),
           LinearWidgetPointer(value: 98, offset: 10, position: LinearElementPosition.outside, enableAnimation: false, child: Text('F', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: mainColor))),
-          LinearShapePointer(value: level, color: mainColor),
+          LinearShapePointer(value: level, color: mainColor, shapeType: LinearShapePointerType.triangle, position: LinearElementPosition.inside, offset: 1)
         ],
         barPointers: [LinearBarPointer(value: level, thickness: 20, color: mainColor,)],
       );
