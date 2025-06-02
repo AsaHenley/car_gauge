@@ -1,13 +1,30 @@
 import 'dart:convert';
 import 'package:car_gauges_flutter/obd_gauges.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+//import 'package:window_manager/window_manager.dart'; // Window Manager Code
 
 bool hasData = false;
 Color mainColor = const Color.fromARGB(255, 5, 223, 175);
 Color secondaryColor = const Color.fromARGB(255, 2, 49, 94); //const Color.fromARGB(255, 2, 60, 75);
 Color background = const Color.fromARGB(255, 0, 0, 0);
-void main() {
+void main() async{
+/* // Window Manager Code
+  WidgetsFlutterBinding.ensureInitialized(); // Window Manager Code
+  await windowManager.ensureInitialized(); // Window Manager Code
+
+  WindowOptions windowOptions = WindowOptions( // Window Manager Code
+    fullScreen: true, // Window Manager Code
+    backgroundColor: Colors.transparent, // Window Manager Code
+    skipTaskbar: false, // Window Manager Code
+  ); // Window Manager Code
+
+  windowManager.waitUntilReadyToShow(windowOptions, () async { // Window Manager Code
+    await windowManager.show(); // Window Manager Code
+    await windowManager.focus(); // Window Manager Code
+  }); // Window Manager Code
+*/ // Window Manager Code
   runApp(const MainApp());
 }
 
@@ -16,6 +33,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     return const MaterialApp(
       home: Scaffold(
         body: Display()
@@ -45,9 +63,10 @@ class DisplayState extends State<Display>{
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
-    double speedWidth = screenSize.width * 0.3;
-    Offset speedLoc = Offset(screenSize.height * 0.5, screenSize.width * 0.7) - Offset(speedWidth/2, speedWidth/2);
-    Offset rpmLoc = Offset(screenSize.height * 0.5, screenSize.width * 0.3) - Offset(speedWidth/2, speedWidth/2);
+    double centerPoint = screenSize.height * 0.5;
+    double baseWidth = screenSize.width * 0.3; // Size of gauges
+    Offset speedLoc = Offset(centerPoint, screenSize.width * 0.7) - Offset(baseWidth/2, baseWidth/2); // Location of gauges
+    Offset rpmLoc = Offset(centerPoint, screenSize.width * 0.3) - Offset(baseWidth/2, baseWidth/2);
     return Container(
       color: background,
       child: 
@@ -77,7 +96,7 @@ class DisplayState extends State<Display>{
                 top: speedLoc.dx,
                 left: speedLoc.dy,
                 child: Container(
-                  width: speedWidth,
+                  width: baseWidth,
                   decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [background, secondaryColor], begin: Alignment.bottomCenter, end: Alignment.topCenter)),
                   child: FittedBox(fit: BoxFit.contain, child: Speedometer(speedKph: speed, title: 'MPH'))
                 )
@@ -86,7 +105,7 @@ class DisplayState extends State<Display>{
                 top: speedLoc.dx,
                 left: speedLoc.dy,
                 child: SizedBox(
-                  width: speedWidth,
+                  width: baseWidth,
                   child: FittedBox(fit: BoxFit.contain, child: RadialLevel(level: fuelLevel, startAng: 300, endAng: 60))
                 )
               ),
@@ -94,7 +113,7 @@ class DisplayState extends State<Display>{
                 top: rpmLoc.dx,
                 left: rpmLoc.dy,
                 child: Container(
-                  width: speedWidth,
+                  width: baseWidth,
                   decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [background, secondaryColor], begin: Alignment.bottomCenter, end: Alignment.topCenter)),
                   child: FittedBox(fit: BoxFit.contain, child: RmpGauge(rmp: rmp, title: 'RPM',))
                 )
@@ -103,16 +122,16 @@ class DisplayState extends State<Display>{
                 top: rpmLoc.dx,
                 left: rpmLoc.dy,
                 child: SizedBox(
-                  width: speedWidth,
+                  width: baseWidth,
                   child: FittedBox(fit: BoxFit.contain, child: RadialLevel(level: throttle, startAng: 120, endAng: 250))
                 )
               ),
               Positioned(
                 left: screenSize.width*0.82,
-                top: screenSize.height*0.2,
+                top: (screenSize.height - baseWidth) * 0.5,
                 child: SizedBox(
                   width: screenSize.width * 0.25,
-                  height: screenSize.height * 0.6,
+                  height: baseWidth,
                   child: FittedBox(fit: BoxFit.contain, child: LevelGauge(level: fuelLevel)),
                 )             
               ),
