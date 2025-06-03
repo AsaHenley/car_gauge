@@ -1,7 +1,5 @@
-
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'package:car_gauges_flutter/main.dart';
 
 
 
@@ -9,19 +7,29 @@ class Speedometer extends StatelessWidget{
   const Speedometer(
     {super.key, 
     required this.speedKph,
-    this.title = ''});
+    this.title = '',
+    this.mainColor = const Color.fromARGB(255, 159, 201, 7),
+    this.secondaryColor = const Color.fromARGB(255, 30, 139, 3)
+    }
+  );
 
   final double speedKph;
   final String title;
+  final Color mainColor;
+  final Color secondaryColor;
 
   @override
   Widget build(BuildContext context) {
+    double start = 130;
+    double end = 50;
     return SfRadialGauge(
       axes: [
         RadialAxis(
           minimum: 0,
           maximum: 200,
           labelOffset: 45,
+          startAngle: start,
+          endAngle: end,
           showAxisLine: false,
           showTicks: false,
           axisLabelStyle: GaugeTextStyle(color: mainColor),
@@ -29,6 +37,8 @@ class Speedometer extends StatelessWidget{
         RadialAxis(
           minimum: 0,
           maximum: 125,
+          startAngle: start,
+          endAngle: end,
           labelOffset: 10,
           tickOffset: -5,
           axisLabelStyle: GaugeTextStyle(color: mainColor, fontSize: 18, fontWeight: FontWeight.bold),
@@ -74,12 +84,18 @@ class RadialLevel extends StatelessWidget{
     required this.level,
     this.title = '',
     this.startAng = 130,
-    this.endAng = 50});
+    this.endAng = 50,
+    this.mainColor = const Color.fromARGB(255, 159, 201, 7),
+    this.secondaryColor = const Color.fromARGB(255, 30, 139, 3)
+    }
+  );
 
   final double level;
   final String title;
   final double startAng;
   final double endAng;
+  final Color mainColor;
+  final Color secondaryColor;
 
   @override
   Widget build(BuildContext context) {
@@ -118,29 +134,45 @@ class RadialLevel extends StatelessWidget{
 class RmpGauge extends StatelessWidget{
   const RmpGauge(
     {super.key, 
-    required this.rmp,
-    this.title = ''});
+    required this.value,
+    this.title = '',
+    this.mainColor = const Color.fromARGB(255, 159, 201, 7),
+    this.secondaryColor = const Color.fromARGB(255, 30, 139, 3),
+    this.minVal = 0,
+    this.maxVal = 6.1,
+    this.annotation = ''
+    }
+  );
 
-  final double rmp;
+  final double value;
   final String title;
+  final Color mainColor;
+  final Color secondaryColor;
+  final double maxVal;
+  final double minVal;
+  final String annotation;
 
   @override
   Widget build(BuildContext context) {
+    double start = 130;
+    double end = 50;
     return SfRadialGauge(
       axes: [
         RadialAxis(
-          minimum: 0,
-          maximum: 6.1,
+          minimum: minVal,
+          maximum: maxVal,
+          startAngle: start,
+          endAngle: end,
           labelOffset: 10,
           tickOffset: -5,
           axisLabelStyle: GaugeTextStyle(color: mainColor, fontSize: 18, fontWeight: FontWeight.bold),
           showAxisLine: false,
-          interval: 1,
+          interval: maxVal-minVal > 10 ? 10:1,
           minorTicksPerInterval: 5,
           majorTickStyle: MajorTickStyle(length: 10, thickness: 3, color: mainColor),
           minorTickStyle: MinorTickStyle(length: 5, thickness: 2, color: mainColor),
           pointers: [
-            NeedlePointer(value: rmp/1000, knobStyle: KnobStyle(color: Colors.black, knobRadius: 0.06), needleEndWidth: 7, needleStartWidth: 0.1, needleColor: const Color.fromARGB(255, 255, 17, 0), enableAnimation: true)
+            NeedlePointer(value: value, knobStyle: KnobStyle(color: Colors.black, knobRadius: 0.06), needleEndWidth: 7, needleStartWidth: 0.1, needleColor: const Color.fromARGB(255, 255, 17, 0), enableAnimation: true)
             ],
           annotations: [
             GaugeAnnotation(
@@ -149,7 +181,7 @@ class RmpGauge extends StatelessWidget{
               positionFactor: 0.5,
             ),
             GaugeAnnotation(
-              widget: Text('$rmp', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: mainColor),),
+              widget: Text(annotation, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: mainColor),),
               angle: 90,
               positionFactor: 0.7,
             ),
@@ -163,14 +195,20 @@ class RmpGauge extends StatelessWidget{
 class LevelGauge extends StatelessWidget{
   const LevelGauge(
     {super.key, 
-    required this.level});
+    required this.level,
+    this.mainColor = const Color.fromARGB(255, 159, 201, 7),
+    this.secondaryColor = const Color.fromARGB(255, 30, 139, 3)
+    }
+  );
 
   final double level;
+  final Color mainColor;
+  final Color secondaryColor;
 
   @override
   Widget build(BuildContext context) {
     return SfLinearGauge(
-      axisTrackStyle: LinearAxisTrackStyle(thickness: 19, color: secondaryColor),
+      axisTrackStyle: LinearAxisTrackStyle(thickness: 20, color: secondaryColor),
       showLabels: false,
       majorTickStyle: LinearTickStyle(length: 7, thickness: 2, color: mainColor),
       minorTickStyle: LinearTickStyle(length: 3, thickness: 1, color: mainColor),

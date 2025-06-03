@@ -7,7 +7,7 @@ app = FastAPI()
 connection = obd.OBD()
 start_time = time.time()
 
-@app.get("/")
+@app.get("/") # http://127.0.0.1:8000/
 def read_root():
     return getObdData()
 
@@ -16,15 +16,14 @@ def getObdData():
     # Read obd data here, parse it and return it
     if(connection.status() == obd.OBDStatus.NOT_CONNECTED):
         print('No Obd Connection')
-        speed = random.randint(10, 140)
-        rpm = random.randint(1000, 3500)
+        speed = random.randint(10, 140) # kph
+        rpm = random.randint(1000, 3500) # rmp
         coolant_temp = random.randint(80, 110) # C
         throttle = random.randint(0, 100) # %
         run_time = int(time.time() - start_time) # time since program start
         fuel = random.randint(0, 100)# %
         oil_temp = random.randint(80, 110) # C
-        
-        fuel = random.randint(10, 90)
+        fuel = random.randint(10, 90) # %
     else:
         speed = obd.commands.SPEED # kph
         rpm = obd.commands.RPM # rmp
