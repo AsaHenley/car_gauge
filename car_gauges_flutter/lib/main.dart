@@ -46,7 +46,7 @@ class Display extends StatefulWidget{
     GaugeTheme(Color.fromARGB(255, 1, 243, 130), Color.fromARGB(255, 2, 116, 40), Color.fromARGB(255, 0, 0, 0)),
     GaugeTheme(Color.fromARGB(255, 255, 1, 242), Color.fromARGB(255, 1, 76, 105), Color.fromARGB(255, 0, 0, 0)),
     GaugeTheme(Color.fromARGB(255, 1, 255, 200), Color.fromARGB(255, 67, 1, 105), Color.fromARGB(255, 0, 0, 0)),
-    GaugeTheme(Color.fromARGB(255, 248, 60, 3), Color.fromARGB(255, 0, 0, 0), Color.fromARGB(255, 0, 0, 0)),
+    GaugeTheme(Color.fromARGB(255, 248, 60, 3), Color.fromARGB(255, 0, 0, 0), Color.fromARGB(255, 0, 0, 0), badStatus: Color.fromARGB(255, 255, 1, 242)),
     GaugeTheme(Color.fromARGB(255, 241, 238, 4), Color.fromARGB(255, 209, 112, 1), Color.fromARGB(255, 0, 0, 0)),
   ];
 
@@ -67,11 +67,13 @@ class DisplayState extends State<Display>{
   late GaugeTheme curTheme;
   int themeIndex = 0;
   late Timer timer;
+  bool badStat = false;
 
   @override
   void initState(){
     super.initState();
     curTheme = widget.themes[themeIndex];
+    // ---- TIMER SETTING ----
     timer = Timer.periodic(Duration(milliseconds: 5000), setNewData);
   }
 
@@ -79,13 +81,17 @@ class DisplayState extends State<Display>{
     getObdData().then((data){
       setState(() {
         if(!hasData){return;}
-        speed = data['speed'].toDouble();
-        rmp = data['rpm'].toDouble();
-        fuelLevel = data['fuel'].toDouble();
-        throttle = data['throttle'].toDouble();
-        coolTemp = data['coolant_temp'].toDouble();
-        oilTemp = data['oil_temp'].toDouble();
-        tripTime = Duration(seconds: data['run_time']);
+        try {
+          speed = data['speed'].toDouble();
+          rmp = data['rpm'].toDouble();
+          fuelLevel = data['fuel'].toDouble();
+          throttle = data['throttle'].toDouble();
+          coolTemp = data['coolant_temp'].toDouble();
+          oilTemp = data['oil_temp'].toDouble();
+          tripTime = Duration(seconds: data['run_time']);
+          badStat = !badStat;
+        }
+        catch(_){} // if data came back bad just don't update
       });
     });
   }
@@ -95,10 +101,11 @@ class DisplayState extends State<Display>{
     Size screenSize = MediaQuery.of(context).size;
     double centerPoint = screenSize.height * 0.5;
     double baseWidth = screenSize.width * 0.3; // Size of gauges
-    Offset speedLoc = Offset(centerPoint, screenSize.width * 0.7) - Offset(baseWidth/2, baseWidth/2); // Location of gauges
-    Offset rpmLoc = Offset(centerPoint, screenSize.width * 0.3) - Offset(baseWidth/2, baseWidth/2);
-    Offset oilLoc = Offset(centerPoint * 0.9, screenSize.width * 0.45) - Offset(baseWidth/2, baseWidth*.3/2);
-    Offset coolLoc = Offset(centerPoint * 0.9, screenSize.width * 0.55) - Offset(baseWidth/2, baseWidth*.3/2);
+    Offset speedLoc = Offset(screenSize.width * 0.7, centerPoint) - Offset(baseWidth/2, baseWidth/2); // Location of gauges
+    Offset rpmLoc = Offset(screenSize.width * 0.3, centerPoint) - Offset(baseWidth/2, baseWidth/2);
+    Offset oilLoc = Offset(screenSize.width * 0.45, centerPoint * 0.9) - Offset(baseWidth*.3/2, baseWidth/2);
+    Offset coolLoc = Offset(screenSize.width * 0.55, centerPoint * 0.9) - Offset(baseWidth*.3/2, baseWidth/2);
+    Offset timeLoc = Offset(screenSize.width/2 - 50, screenSize.height/2 - 40);
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -115,71 +122,69 @@ class DisplayState extends State<Display>{
         color: curTheme.background,
         child: Stack(
           children: [
-            Positioned( // Speedometer
-              top: speedLoc.dx,
-              left: speedLoc.dy,
+            // ---- SPEEDOMETER ----
+            Positioned(top: speedLoc.dy, left: speedLoc.dx,
               child: Container(
                 width: baseWidth,
                 decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [curTheme.background, curTheme.secondaryColor], begin: Alignment.bottomCenter, end: Alignment.topCenter)),
                 child: FittedBox(fit: BoxFit.contain, child: Speedometer(speedKph: speed, title: 'MPH', mainColor: curTheme.mainColor, secondaryColor: curTheme.secondaryColor))
               )
             ),
-            Positioned( // Throttle Level
-              top: speedLoc.dx,
-              left: speedLoc.dy,
+            // ---- THROTTLE ----
+            Positioned(top: speedLoc.dy, left: speedLoc.dx,
               child: SizedBox(
                 width: baseWidth,
                 child: FittedBox(fit: BoxFit.contain, child: RadialLevel(level: fuelLevel, startAng: 300, endAng: 60, mainColor: curTheme.mainColor, secondaryColor: curTheme.secondaryColor))
               )
             ),
-            Positioned( // RMP
-              top: rpmLoc.dx,
-              left: rpmLoc.dy,
+            // ---- RMP ----
+            Positioned(top: rpmLoc.dy, left: rpmLoc.dx,
               child: Container(
                 width: baseWidth,
                 decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [curTheme.background, curTheme.secondaryColor], begin: Alignment.bottomCenter, end: Alignment.topCenter)),
                 child: FittedBox(fit: BoxFit.contain, child: RmpGauge(value: rmp/1000, title: 'RPM', annotation: '${rmp.round()}', mainColor: curTheme.mainColor, secondaryColor: curTheme.secondaryColor))
               )
             ),
-            Positioned( // Other
-              top: rpmLoc.dx,
-              left: rpmLoc.dy,
+             // ---- FFFFFFF ----
+            Positioned(top: rpmLoc.dy, left: rpmLoc.dx,
               child: SizedBox(
                 width: baseWidth,
                 child: FittedBox(fit: BoxFit.contain, child: RadialLevel(level: throttle, startAng: 120, endAng: 250, mainColor: curTheme.mainColor, secondaryColor: curTheme.secondaryColor))
               )
             ),
-            Positioned( // Oil Temp
-              top: oilLoc.dx,
-              left: oilLoc.dy,
+            // ---- OIL TEMP ----
+            Positioned(top: oilLoc.dy, left: oilLoc.dx,
               child: Container(
                 width: baseWidth * 0.3,
                 decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [curTheme.background, curTheme.secondaryColor], begin: Alignment.bottomCenter, end: Alignment.topCenter)),
                 child: FittedBox(fit: BoxFit.contain, child: RmpGauge(value: oilTemp, minVal: 70, maxVal: 111, title: 'Oil', annotation: '${oilTemp.round()} C', mainColor: curTheme.mainColor, secondaryColor: curTheme.secondaryColor))
               )
             ),
-            Positioned( // Coolant Temp
-              top: coolLoc.dx,
-              left: coolLoc.dy,
+            // ---- COOLANT TEMP ----
+            Positioned(top: coolLoc.dy, left: coolLoc.dx,
               child:  Container(
                 width: baseWidth * 0.3,
                 decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [curTheme.background, curTheme.secondaryColor], begin: Alignment.bottomCenter, end: Alignment.topCenter)),
                 child: FittedBox(fit: BoxFit.contain, child: RmpGauge(value: coolTemp, minVal: 70, maxVal: 111, title: 'Coolant', annotation: '${coolTemp.round()} C',  mainColor: curTheme.mainColor, secondaryColor: curTheme.secondaryColor))
               )
             ),
-            Positioned( // Fuel Level
-              left: screenSize.width*0.82,
-              top: (screenSize.height - baseWidth) * 0.5,
+            // ---- FUEL LEVEL ----
+            Positioned(top: (screenSize.height - baseWidth) * 0.5, left: screenSize.width * 0.82,
               child: SizedBox(
                 width: screenSize.width * 0.25,
                 height: baseWidth,
                 child: FittedBox(fit: BoxFit.contain, child: LevelGauge(level: fuelLevel, mainColor: curTheme.mainColor, secondaryColor: curTheme.secondaryColor)),
               )             
             ),
-            Positioned(
-              left: screenSize.width/2 - 50,
-              top: screenSize.height/2 -40,
+             // ---- CLOCK ----
+            Positioned(top: timeLoc.dy, left: timeLoc.dx,
               child: Text(tripTime.toString().substring(0, tripTime.toString().indexOf('.')), style: TextStyle(color: curTheme.mainColor, fontSize: 32))
+            ),
+            Positioned(top: timeLoc.dy - 40, left: timeLoc.dx - 10,
+              child: Icon(Icons.water_drop, color: oilTemp > 100 ? curTheme.badStatus : curTheme.mainColor)
+            ),
+            Positioned(top: timeLoc.dy - 40, left: timeLoc.dx + 85,
+              child: Icon(Icons.abc, color: badStat ? curTheme.badStatus : curTheme.mainColor)
             )
           ],
         ),
@@ -191,7 +196,8 @@ class DisplayState extends State<Display>{
 
 Future<dynamic> getObdData() async{
   try{
-    final response = await http.get(Uri.parse('http://127.0.0.1:8000/'));
+    // Attmept to get data from the fast api on the local host port 8000 
+    final response = await http.get(Uri.parse('http://localhost:8000/')); // http://127.0.0.1:8000
     hasData = true;
     return json.decode(response.body);
   }catch(_){
@@ -203,9 +209,10 @@ Future<dynamic> getObdData() async{
 }
 
 class GaugeTheme{
-  const GaugeTheme(this.mainColor,this.secondaryColor, this.background);
+  const GaugeTheme(this.mainColor, this.secondaryColor, this.background, {this.badStatus = Colors.red});
 
   final Color mainColor;
   final Color secondaryColor;
   final Color background;
+  final Color badStatus;
 }
